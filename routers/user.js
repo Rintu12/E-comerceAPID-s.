@@ -3,19 +3,16 @@ const cryptojs = require("crypto-js")
  const {veryfyTokenAuth ,isAdminverifyToken} = require("./verifyToken");
  const user  = require("../models/user")
 
-
-// UPDATE
-router.put("/:id",veryfyTokenAuth, async(req,res) =>{
-
+ // UPDATE
+ 
+ router.put("/:id",veryfyTokenAuth, async(req,res) =>{
   if(req.body.password){
 
     req.body.password = cryptojs.AES.             //if user change the password  before encrypted  the pass word updated
-                        encrypt(req.body.password,
-                          process.env.PASSWORD_ENC
-                          ).toString();
+    encrypt(req.body.password,
+     process.env.PASSWORD_ENC
+    ).toString();
   }
-
- 
    // updated the user document in db
    try{
      const updateduser = await user.findByIdAndUpdate(req.params.id,{
@@ -31,14 +28,9 @@ router.put("/:id",veryfyTokenAuth, async(req,res) =>{
     return res.status(500).json(err);
 
    }
-  
-
 });
 // DELETE  USER
-
-
  router.delete("/:id",veryfyTokenAuth,async(req,res)=>{
-
    try{                                                 // try  continue delete process 
     await user.findByIdAndDelete(req.params.id);
     res.status(200).json("user has been delete .......")
@@ -47,8 +39,6 @@ router.put("/:id",veryfyTokenAuth, async(req,res) =>{
      res.status(500).json(err);
    }
  });
-
-
    // GET USER
    router.get("/find/:id" ,isAdminverifyToken, async (req,res) =>{
 
@@ -77,12 +67,10 @@ router.put("/:id",veryfyTokenAuth, async(req,res) =>{
     res.status(500).json(err);
   }
 });
-
  // GET USER STATS
  router.get("/stats", isAdminverifyToken, async ( res) => {
   const date = new Date();
   const lastYear = new Date(date.setFullYear(date.getFullYear() - 1));
-
   try {
     const data = await User.aggregate([
       { $match: { createdAt: { $gte: lastYear } } },
@@ -103,8 +91,5 @@ router.put("/:id",veryfyTokenAuth, async(req,res) =>{
     res.status(500).json(err);
   }
 });
-
-
-
 
 module.exports = router;

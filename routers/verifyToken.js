@@ -1,33 +1,36 @@
-// const res = require("express/lib/response");
-const jwt = require("jsonwebtoken");
-const user = require("../models/user");
 
-// const User = require("../models/user")
+const jwt = require("jsonwebtoken");
+
 
  const veirfyToken = (req,res,next) =>{
-
+      
    const authheader = req.headers.token;
-
   if(authheader){
       const token = authheader.split(" ")[1];
 
-    jwt.verify(token,process.env.JWT_SEC,(err,User) =>{
+    jwt.verify(token,process.env.JWT_SEC,(err,  User) =>{
 
-            if(err) res.status(403).json("json token is not valid");  
+            if(err)   res.status(403).json("json token is not valid");  
             req.User = User;
+             
             next();
+             
     });
+     
+    // res.end();
   }else{
 
   return   res.status(401).json(" you are not authenticated");
+  
   }
+
+  
  };
 // AUTHENTICATION USER TOKEN
   const veryfyTokenAuth = (req,res,next) =>{
-
+    
      veirfyToken(req,res,()=>{
-
-   if(req.User.id === req.params.id  || req.User.isAdmin){
+   if(req.User.id === req.params.id || req.User.isAdmin){
      next();
    }else{
    return res.status(403).json("you are not authenticated")

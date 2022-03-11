@@ -18,7 +18,7 @@ const { validationResult } = require("express-validator");
           password:cryptojs.AES.encrypt(req.body.password,process.env.PASSWORD_ENC).toString(),
 
         }); 
-     
+           
 
         try{ 
            // check email use allready or not
@@ -27,7 +27,7 @@ const { validationResult } = require("express-validator");
           {
              res.status(403).json(errors);
           }
-
+            
 
             const saveuser =  await newuser.save();
             const {password , ...others} = saveuser._doc;
@@ -37,13 +37,14 @@ const { validationResult } = require("express-validator");
         }catch(err){
 
               res.status(500).json(err)
+            //  
 
         }
       });
 
  /// LOGIN FUNCION
                 
-           router.post('/login', async(req,res)=>{
+           router.post("/login", async(req,res)=>{
              
              try{
 
@@ -52,11 +53,11 @@ const { validationResult } = require("express-validator");
 
                 !User && res.status(401).json("wrong user name");
              const hashedpassword =    cryptojs.AES.decrypt(
-
+               
 
                   User.password,
                   process.env.PASSWORD_ENC
-
+              
              );
              const original_password = hashedpassword.toString(cryptojs.enc.Utf8);
               const input_password =  req.body.password;
@@ -68,24 +69,24 @@ const { validationResult } = require("express-validator");
 
 
 
-              //after login genarate jwt token
+              //after login genarate jwt token to this user
 
+              
 
+               
                const accestoken =  jwttoken.sign(
+                 // generate the payload
                  
                 {
-
-
-                  id:User._id,
-                  isAdmin:User.isAdmin,
-
-
-                },
+                  id :User._id,
+                  isAdmin:User.isAdmin
+                },  
                 process.env.JWT_SEC,
                 {expiresIn:"2d"}
                
                );
-
+              
+                   
                     // except password all field save to the db
                     // destructure the object
                     const { password , ...others } = User._doc;
@@ -100,19 +101,19 @@ const { validationResult } = require("express-validator");
                    res.status(500).json(err); 
               
              }
-
            
 
            });
 
+               module.exports = router;
 
 
-          
+            
 
   
 
 
- module.exports = router;
+             
 
 
 

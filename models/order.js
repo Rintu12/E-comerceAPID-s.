@@ -1,57 +1,103 @@
 const mongoose = require("mongoose");
 
-
- const orderSchema = new mongoose.Schema({
-
-    userId:{type:String,required:true},
-
-    // one user many product 
-    products :[
-
-        {
-           productId:{
-
-              type:String,
-            },
-            quentity:{
-              type:Number,
-              default:1,
-            },
-
-        },
-    ],
-
-    amount:{type:Number,required:true},
-
-   addres:{type:Object,required:true},
-
-   status:{type:String,default:"pending"},
+const addressSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+    trim: true,
+    min: 3,
+    max: 50,
+  },
+  mobileNumber: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  pinCode: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  locality: {
+    type: String,
+    required: true,
+    trim: true,
+    min: 10,
+    max: 100,
+  },
+  address: {
+    type: String,
+    required: true,
+    trim: true,
+    min: 10,
+    max: 100,
+  },
+  alternateaddress:{
+    type:String,
+    required:true,
+    trim: true,
+    min:10,
+    max:100
+  },
+  cityDistrictTown: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  state: {
+    type: String,
+    required: true,
     
- });
+  },
+  landmark: {
+    type: String,
+    min: 10,
+    max: 100,
+  },
+  alternatePhone: {
+    type: String,
+  },
+  addressType: {
+    type: String,
+    required: true,
+    enum: ["home", "work"],
+    required: true,
+  },
 
+}, { timestamps: true });
 
+// B
+const userAddressSchema = new mongoose.Schema(
+  {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: "User",
+    },
+    address: [addressSchema],
+    items: [
+      {
+        productId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Product",
+        },
+        payablePrice: {
+          type: Number,
+          required: true,
+        },
+        purchasedQty: {
+          type: Number,
+          required: true,
+        },
+      },
+     
+         ],
 
- module.exports = ("order",orderSchema);
+  },
+  
+  { timestamps: true }
+);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+mongoose.model("Address", addressSchema);
+module.exports = mongoose.model("UserAddress", userAddressSchema);
+ 

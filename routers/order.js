@@ -1,75 +1,88 @@
 const router = require("express").Router();
 
-  const order = require("../models/order");
+  
+  const UserAddress = require("../models/order")
+
   const {veryfyTokenAuth ,isAdminverifyToken, veirfyToken} = require("./verifyToken");
-  //CREATE ORDER
-
-  router.post("/",veirfyToken, async(req,res)=>{
-
-   const Order = new order(req.body);
-
-  try{
-   const saveorder = await Order.save();
-   res.status(200).json(saveorder);
-
-  }catch(err){
-
-
-  res.status(500).json(err);
-
-
-  }
-   
-  })
-
-  // DELETE ORDER
-
-  router.delete("/:id",isAdminverifyToken, async(req,res) =>{
-
-    try{
-   await order.findByIdAndDelete(req.params.id);
-    res.status(200).json("order ahs been delete.........");
-    }catch(err){
-
-  res.status(500).json(err)
-
-
+ 
+  // add order to the user
+ router.post("/user/addOrder" ,veirfyToken , (req , res) =>{
+    
+   UserAddress.findOne({userId: req.User.id})
+   .exec( async(error,newOrder) =>{
+    if(error) {
+        res.status(403).json({error});
+      // return;
     }
+    if(newOrder){
+     if(req.body.address){ // cheack the body is present address body to the user
+          UserAddress.findOneAndUpdate({"userId":req.User.id},
+          {
+            $push: {
+              "address": req.body.address
+            }
+          }
+          ).exec((error, _newOrder) =>{
+            if(error){
+             return  res.status(400).json({error})
+            }
+           if(!_newOrder){  // cheack if the address is alredy 
+              res.status(200).json({newOrder:_newOrder})
+             
+           }else {
+             return;
+           }
 
-  });
-
-
-
-  //UPDATE ORDER
-
-  router.put("/:id",isAdminverifyToken,async(req,res) =>{
-        try{
-            const updatedOrder = await order.findByIdAndUpdate(
-                {
-                    $set:req.body,
-                },
-                {new:true}
-            );
-            res.status(200).json(updatedOrder);
-
-        }catch(err){
-            res.status(500).json(err)
+          });
         }
-  });
+        
+      /// if iteam is present
+      if(req.body.items){
 
-  /// GET USER ORDER
-  router.get("find/:userId",veryfyTokenAuth,async(req,res) =>{
+      UserAddress.findOneAndUpdate({"userId": req.User.id},
+        {
+          $push: {
+            "items": req.body.items
+          }
+        }
+      ).exec((error , _newitems) =>{
+        if(error){
+          return res.status(403).json({error})
+        }
+       if(_newitems){
+         res.status(200).json({newOrder:_newitems});
+          
+       }
+      })
+      }
+    }else{
+      const newOrder =    new UserAddress({
+        userId:req.User.id,
+        address:req.body.Address,
+        // items:req.body.items
+       })
+      
+       newOrder.save((error , newOrder) =>{
 
-  try{
-      const orders = await order.find({userId:req.params.userId});
-      res.status(200).json(orders);
+      if( error) {
 
-  }catch(err){
+        return res.sendStatus(403)
+      }
+      if(newOrder){
+        
+       return res.status(200).json({newOrder})
 
-    res.status(500).json(err)
-  }
+      }
+       });
+      }
 
-  });
+    
+
+  
+ });
+
+});
+
 
    // GET ALL
 
@@ -111,29 +124,4 @@ router.get("/income", isAdminverifyToken, async (req, res) => {
     }
   });
   
-
-
-
- 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-module.exports = router;
+  module.exports = router;
